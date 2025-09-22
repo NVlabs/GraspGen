@@ -20,7 +20,7 @@ RUN pip install torch-cluster -f https://data.pyg.org/whl/torch-2.7.0+cu128.html
 RUN pip install imageio opencv-python python-fcl
 
 # Install pyrender
-RUN pip install pyrender && pip install PyOpenGL==3.1.5
+RUN pip install pyrender==0.1.45 pyglet==2.1.6 && pip install PyOpenGL==3.1.5
 
 # Install pointnet2 modules
 COPY pointnet2_ops pointnet2_ops
