@@ -55,6 +55,8 @@ GraspGen is a modular framework for diffusion-based 6-DOF robotic grasp generati
 
 ## Release News
 
+- \[09/30/2025\] Isaac-Lab based grasp data generation released as [GraspDataGen](https://github.com/NVlabs/GraspDataGen) package
+
 - \[07/16/2025\] Initial code release! Version `1.0.0`
 
 - \[03/18/2025\] Dataset release on [Hugging Face](https://huggingface.co/datasets/nvidia/PhysicalAI-Robotics-GraspGen)!
