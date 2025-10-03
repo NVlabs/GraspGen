@@ -26,7 +26,7 @@ from grasp_gen.utils.meshcat_utils import (
     visualize_mesh,
     visualize_pointcloud,
 )
-from grasp_gen.utils.point_cloud_utils import point_cloud_outlier_removal
+from grasp_gen.utils.point_cloud_utils import point_cloud_outlier_removal_with_color
 
 
 def parse_args():
@@ -132,9 +132,13 @@ if __name__ == "__main__":
 
         visualize_pointcloud(vis, "pc_scene", xyz_scene, xyz_scene_color, size=0.0025)
 
-        obj_pc, pc_removed = point_cloud_outlier_removal(torch.from_numpy(obj_pc))
+        obj_pc, pc_removed, obj_pc_color, obj_pc_color_removed = point_cloud_outlier_removal_with_color(
+            torch.from_numpy(obj_pc), torch.from_numpy(obj_pc_color)
+        )
         obj_pc = obj_pc.cpu().numpy()
         pc_removed = pc_removed.cpu().numpy()
+        obj_pc_color = obj_pc_color.cpu().numpy()
+        obj_pc_color_removed = obj_pc_color_removed.cpu().numpy()
 
         visualize_pointcloud(vis, "pc_obj", obj_pc, obj_pc_color, size=0.005)
 
