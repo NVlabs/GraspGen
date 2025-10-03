@@ -82,3 +82,52 @@ def point_cloud_outlier_removal(
         f"Removed {obj_pc.shape[1] - filtered_pc.shape[0]} points from point cloud"
     )
     return filtered_pc, removed_pc
+
+def point_cloud_outlier_removal_with_color(
+    obj_pc: torch.Tensor,
+    obj_pc_color: torch.Tensor,
+    threshold: float = 0.014,
+    K: int = 20,
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """
+    Remove outliers from a point cloud with colors. K-nearest neighbors is used to compute the distance to the nearest neighbor for each point.
+    If the distance is greater than a threshold, the point is considered an outlier and removed.
+
+    Args:
+        obj_pc (torch.Tensor or np.ndarray): (N, 3) tensor or array representing the point cloud.
+        obj_pc_color (torch.Tensor or np.ndarray): (N, 3) tensor or array representing the point cloud color.
+        threshold (float): Distance threshold for outlier detection. Points with mean distance to K nearest neighbors greater than this threshold are removed.
+        K (int): Number of nearest neighbors to consider for outlier detection.
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]: Tuple containing filtered and removed point clouds and colors.
+    """
+    # Convert numpy array to torch tensor if needed
+    if isinstance(obj_pc, np.ndarray):
+        obj_pc = torch.from_numpy(obj_pc)
+    if isinstance(obj_pc_color, np.ndarray):
+        obj_pc_color = torch.from_numpy(obj_pc_color)
+
+    obj_pc = obj_pc.float()
+    obj_pc = obj_pc.unsqueeze(0)
+
+    obj_pc_color = obj_pc_color.float()
+    obj_pc_color = obj_pc_color.unsqueeze(0)
+
+    nn_dists, _ = knn_points(obj_pc[0], K=K, norm=1)
+
+    mask = nn_dists.mean(1) < threshold
+    filtered_pc = obj_pc[0, mask]
+    removed_pc = obj_pc[0][~mask]
+    filtered_pc = filtered_pc.view(-1, 3)
+    removed_pc = removed_pc.view(-1, 3)
+
+    filtered_pc_color = obj_pc_color[0, mask]
+    removed_pc_color = obj_pc_color[0][~mask]
+    filtered_pc_color = filtered_pc_color.view(-1, 3)
+    removed_pc_color = removed_pc_color.view(-1, 3)
+
+    logger.info(
+        f"Removed {obj_pc.shape[1] - filtered_pc.shape[0]} points from point cloud"
+    )
+    return filtered_pc, removed_pc, filtered_pc_color, removed_pc_color
