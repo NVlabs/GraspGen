@@ -55,7 +55,7 @@ GraspGen is a modular framework for diffusion-based 6-DOF robotic grasp generati
 
 ## Release News
 
-- \[09/30/2025\] Isaac-Lab based grasp data generation released as [GraspDataGen](https://github.com/NVlabs/GraspDataGen) package
+- \[09/30/2025\] Isaac-Lab based grasp data generation released as [GraspDataGen](https://github.com/NVlabs/GraspDataGen) package (Note: [Data gen for suction grippers is in this repo](grasp_gen/dataset/suction.py))
 
 - \[07/16/2025\] Initial code release! Version `1.0.0`
 
@@ -66,7 +66,7 @@ GraspGen is a modular framework for diffusion-based 6-DOF robotic grasp generati
 
 ## Future Features on the roadmap
 
-- Data generation repo for antipodal grippers based on [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html) (Note: [Data gen for suction grippers already released](grasp_gen/dataset/suction.py))
+- ~~Data generation repo for antipodal grippers based on [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html) (Note: [Data gen for suction grippers already released](grasp_gen/dataset/suction.py))~~
 - Finetuning with real data
 - Infering grasp width based on raycasting
 - PTV3 backbone does not (yet) run on Cuda 12.8 due to a [dependency issue](https://github.com/Pointcept/PointTransformerV3/issues/159). If using Cuda 12.8, please use PointNet++ backbone for now until its resolved.
@@ -205,13 +205,15 @@ Things to note regarding training:
 
 ## Training & Data Generation (for new objects and grippers)
 
-Please see [TUTORIAL.md](tutorials/TUTORIAL.md) for a detailed walkthrough of training a model from scratch, including grasp data generation. Currently, we only include an example for suction grippers and will soon release the data generation for pinch grippers as well.
+Please see [TUTORIAL.md](tutorials/TUTORIAL.md) for a detailed walkthrough of training a model from scratch, including grasp data generation. Currently, we include an example for suction grippers. See the [GraspDataGen](https://github.com/NVlabs/GraspDataGen) package for Isaac Lab based grasp data generation for pinch grippers.
 
 ## GraspGen Conventions
 
 Please see the following files for documentation on the formats we adopted:
 - Gripper configuration: [GRIPPER_DESCRIPTION.md](docs/GRIPPER_DESCRIPTION.md)
 - Grasp Dataset format: [GRASP_DATASET_FORMAT.md](docs/GRASP_DATASET_FORMAT.md)
+
+See the [GraspDataGen](https://github.com/NVlabs/GraspDataGen) package for Isaac Lab based grasp data generation in the above format.
 
 ## FAQ
 
@@ -225,7 +227,7 @@ For optimal performance on a new gripper, we recommend re-training the model wit
 * Gripper description in the GraspGen format. See [GRIPPER_DESCRIPTION.md](docs/GRIPPER_DESCRIPTION.md).
 * Object-Grasp dataset for this gripper consisting of successful and unsuccessful grasps. See [GRASP_DATASET_FORMAT.md](docs/GRASP_DATASET_FORMAT.md)
 
-Please see [TUTORIAL.md](tutorials/TUTORIAL.md) for a detailed walkthrough of training a model from scratch, including grasp data generation.
+Please see [TUTORIAL.md](tutorials/TUTORIAL.md) for a detailed walkthrough of training a model from scratch, including grasp data generation. See [GraspDataGen](https://github.com/NVlabs/GraspDataGen) for data generation.
 
 ### My gripper is very similar to one of the existing grippers. Could I re-target model for my gripper?
 
