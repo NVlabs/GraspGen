@@ -66,6 +66,11 @@ dependencies = [
     "pytest",
     "viser",
     
+    # ZMQ serving
+    "pyzmq",
+    "msgpack",
+    "msgpack-numpy",
+    
     # Pin setuptools to a version that still includes pkg_resources
     # (required by torch==2.1.0 cpp_extension for building CUDA extensions like pointnet2_ops)
     "setuptools>=45,<78",
@@ -89,13 +94,27 @@ dev = [
     "isort",
     "flake8",
 ]
+serve = [
+    "pyzmq",
+    "msgpack",
+    "msgpack-numpy",
+]
 
 [tool.setuptools]
-packages = ["grasp_gen"]
 include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["grasp_gen*"]
 
 [tool.setuptools.package-data]
 "*" = ["*.yaml", "*.yml", "*.json", "*.txt", "*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests requiring a live GraspGen server on localhost:5556",
+]
 
 [tool.black]
 line-length = 88

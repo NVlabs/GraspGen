@@ -37,21 +37,28 @@ GraspGen is a modular framework for diffusion-based 6-DOF robotic grasp generati
 1. [Release News](#release-news)
 2. [Future Features](#future-features-on-the-roadmap)
 3. [Installation](#installation)
-   - [Docker Installation](#installation-with-docker)
+   - [Docker](#installation-with-docker)
    - [Pip Installation](#installation-with-pip)
-   - [uv Installation](#installation-with-uv)
+   - [uv](#installation-with-uv)
+   - [Client-Server](#zmq-server)
+   - [MCP (LLM Tool-Calling)](#mcp-llm-tool-calling)
 4. [Download Model Checkpoints](#download-checkpoints)
 5. [Inference Demos](#inference-demos)
 6. [Dataset](#dataset)
 7. [Training with Existing Datasets](#training-with-existing-datasets)
 8. [Bring Your Own Datasets (BYOD) - Training + Data Generation for new grippers and objects](#training--data-generation-for-new-objects-and-grippers)
 9. [GraspGen Format and Conventions](#graspgen-conventions)
-10. [FAQ](#faq)
-11. [License](#license)
-12. [Citation](#citation)
-13. [Contact](#contact)
+10. [LLM Tool-calling with GraspGen](#llm-tool-calling-with-graspgen)
+11. [FAQ](#faq)
+12. [License](#license)
+13. [Citation](#citation)
+14. [Contact](#contact)
 
 ## Release News
+
+- \[03/03/2026\] Added MCP for calling GraspGen as a tool by an LLM. See [mcp/](mcp/).
+
+- \[03/03/2026\] ZMQ-based server added to run GraspGen without any installation in your application. See [client-server/](client-server/)
 
 - \[02/18/2026\] Paper accepted to ICRA'26, see you in Vienna 🚀🇦🇹
 
@@ -74,14 +81,16 @@ GraspGen is a modular framework for diffusion-based 6-DOF robotic grasp generati
 - PTV3 backbone does not (yet) run on Cuda 12.8/Blackwell GPUs due to a [dependency issue](https://github.com/Pointcept/PointTransformerV3/issues/159). If using Cuda 12.8, please use PointNet++ backbone for now until its resolved.
 
 ## Installation
-Choose your preferred installation method. For training, we recommend **docker**. For inference, **uv** is the fastest and easiest option.
+Choose your preferred installation method. For training, we recommend **docker**. For inference, **uv** is the fastest and easiest option. If you would like to run GraspGen as a standalone server (e.g. for tool-calling from an LLM agent or a remote robot client), see [client-server/README.md](client-server/README.md). We also added a MCP to call GraspGen with an LLM.
 
 **✅ All methods fully tested and working!**
 
 | Method | Use Case | Complexity | Speed | 
 |--------|----------|------------|-------|
 | **Docker** | Training + Inference | ⭐⭐⭐ Recommended for training | Slow |
-| **Pip** and **uv** | Inference | ⭐ Recommended for inference | Fast |
+| **Pip** and **uv** | Inference | ⭐⭐ Recommended for inference | Fast |
+| **ZMQ Server** | Remote inference (no install needed on client) | ⭐ See [client-server/](client-server/) | Fast |
+| **MCP** | LLM tool-calling | ⭐ See [mcp/](mcp/) | Fast |
 
 ### Installation with Docker
 ```bash
@@ -139,6 +148,14 @@ To check if installation has succeeded, run the following test:
 ```bash
 python tests/test_inference_installation.py
 ```
+
+### ZMQ Server
+
+To run GraspGen as a standalone inference server that any client can query without installing the full stack, see [client-server/README.md](client-server/README.md).
+
+### MCP (LLM Tool-Calling)
+
+To enable LLMs to call GraspGen as a tool, see [mcp/README.md](mcp/README.md).
 
 ## Download Checkpoints
 
@@ -271,6 +288,18 @@ Please see the following files for documentation on the formats we adopted:
 - Grasp Dataset format: [GRASP_DATASET_FORMAT.md](docs/GRASP_DATASET_FORMAT.md)
 
 See the [GraspDataGen](https://github.com/NVlabs/GraspDataGen) package for Isaac Lab based grasp data generation in the above format.
+
+## LLM Tool-calling with GraspGen
+
+GraspGen can be deployed as a standalone ZMQ server, making it callable as a tool from LLM agents, remote robot controllers, or any application — without importing model code or needing a local GPU. See [client-server/README.md](client-server/README.md) for full documentation, protocol reference, and examples.
+
+```bash
+# Start the server (Docker):
+bash docker/run_server.sh $(pwd) --models /path/to/GraspGenModels
+
+# Call it from a client (Python — no CUDA required):
+python client-server/graspgen_client.py --mesh_file /path/to/mesh.obj --host localhost --port 5556
+```
 
 ## FAQ
 

@@ -35,7 +35,7 @@ from grasp_gen.dataset.dataset import collate
 @pytest.fixture
 def box_mesh_path():
     """Path to the test box mesh in assets/."""
-    assets_dir = Path(__file__).parent.parent / "assets"
+    assets_dir = Path(__file__).parent.parent / "assets" / "objects"
     box_path = assets_dir / "box.obj"
     if not box_path.exists():
         pytest.skip(f"Test mesh not found at {box_path}")
