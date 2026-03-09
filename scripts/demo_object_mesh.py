@@ -37,7 +37,7 @@ def parse_args():
         "--mesh_file",
         type=str,
         required=True,
-        help="Path to the mesh file (obj, stl, or ply)",
+        help="Path to the mesh file (obj, stl, ply, usd, usda, usdc, or usdz)",
     )
     parser.add_argument(
         "--gripper_config",
@@ -105,6 +105,14 @@ def load_mesh_data(mesh_file, scale, num_sample_points):
         pt_idx = sample_points(xyz, num_sample_points)
         xyz = xyz[pt_idx]
         obj = None
+    elif mesh_file.endswith((".usd", ".usda", ".usdc", ".usdz")):
+        import scene_synthesizer as synth
+
+        asset = synth.Asset(mesh_file)
+        obj = asset.mesh()
+        obj.apply_scale(scale)
+        xyz, _ = trimesh.sample.sample_surface(obj, num_sample_points)
+        xyz = np.array(xyz)
     else:
         obj = trimesh.load(mesh_file)
         obj.apply_scale(scale)
@@ -132,9 +140,9 @@ if __name__ == "__main__":
     if not os.path.exists(args.gripper_config):
         raise ValueError(f"Gripper config {args.gripper_config} does not exist")
 
-    # Check if mesh file has valid extension
-    if not args.mesh_file.endswith((".stl", ".obj")):
-        raise ValueError("Mesh file must be a .stl or .obj file")
+    valid_extensions = (".stl", ".obj", ".ply", ".usd", ".usda", ".usdc", ".usdz")
+    if not args.mesh_file.endswith(valid_extensions):
+        raise ValueError(f"Mesh file must be one of {valid_extensions}")
 
     # Handle return_topk logic
     if args.return_topk and args.topk_num_grasps == -1:
