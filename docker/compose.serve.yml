@@ -1,0 +1,44 @@
+# GraspGen ZMQ Inference Server (Docker Compose)
+#
+# Usage:
+#   # From the GraspGen repo root:
+#
+#   # 1. Build the base image (one time):
+#   bash docker/build.sh
+#
+#   # 2. Start the server (default: Robotiq 2F-140 on port 5556):
+#   MODELS_DIR=/path/to/GraspGenModels docker compose -f docker/compose.serve.yml up --build
+#
+#   # 3. Custom gripper config:
+#   MODELS_DIR=/path/to/GraspGenModels \
+#   SERVER_ARGS="--gripper_config /models/checkpoints/graspgen_franka_panda.yml --port 5557" \
+#     docker compose -f docker/compose.serve.yml up --build
+#
+# The server binds on 0.0.0.0:<port> with network_mode: host,
+# so clients can reach it at tcp://<host-ip>:<port>.
+
+services:
+  graspgen_server:
+    image: graspgen-server
+    build:
+      context: ..
+      dockerfile: docker/serve.dockerfile
+    init: true
+    tty: true
+    network_mode: host
+    volumes:
+      - ${MODELS_DIR:?Set MODELS_DIR to your GraspGenModels path}:/models
+    environment:
+      - NVIDIA_DISABLE_REQUIRE=1
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - SERVER_ARGS
+    command: >
+      ${SERVER_ARGS:---gripper_config /models/checkpoints/graspgen_robotiq_2f_140.yml --port 5556}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    shm_size: "8g"

@@ -40,7 +40,6 @@ ngc/
 osmo/
 bash/
 checkpoints/
-docker/
 notes/
 
 # Package files
