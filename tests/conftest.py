@@ -3,6 +3,16 @@ import torch
 import numpy as np
 
 
+def pytest_addoption(parser):
+    parser.addoption(
+        "--mesh",
+        action="store",
+        default=None,
+        help="Path to .obj mesh file (absolute or relative to repo root). "
+             "Defaults to assets/objects/box.obj.",
+    )
+
+
 @pytest.fixture
 def device():
     """Fixture to provide the device to use for tests."""

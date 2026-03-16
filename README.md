@@ -360,6 +360,33 @@ python scripts/save_grasps_to_usd.py --usd_file assets/objects/box.usd --grasps_
 
 Optional: **`--wireframe_width W`** (default `0.001`), **`--no_visualization`** to skip wireframes. See [Inference Demos](#inference-demos) for other formats (`.obj`,`.pcd`.etc).
 
+### Running grasps in Isaac Sim (10 envs, play-to-grasp)
+
+You can generate a **sim USD** with up to 10 environments: each env has the object and one gripper at a predicted grasp pose. When you open this USD in **Omniverse / Isaac Sim** and press **Play**, the grippers close and grasp the object. A Robotiq 2F-85 gripper USD is included under `assets/bots/robotiq_2f_85.usd` (copied from [GraspDataGen](https://github.com/NVlabs/GraspDataGen)).
+
+**1. Run inference (max 10 grasps) and save YAML**
+
+```bash
+python scripts/demo_object_mesh.py --mesh_file /tmp/box.usd --mesh_scale 1.0 \
+  --gripper_config GRIPPER_CONFIG --output_file /tmp/box_grasps.yml --no-visualization --num_grasps 10
+```
+
+**2. Build the sim USD** (`box_with_grasps_sim.usd`)
+
+```bash
+python scripts/create_grasp_sim_usd.py --object_usd assets/objects/box.usd \
+  --grasps_yaml /tmp/box_grasps.yml --output assets/objects/box_with_grasps_sim.usd --num_envs 10
+```
+
+**3. Open in Isaac Sim and run the grasp script**
+
+- In **Isaac Sim**: **File → Open** and open `assets/objects/box_with_grasps_sim.usd`.
+- Press **Play** to start the simulation.
+- In **Window → Script Editor**, open and run `scripts/run_grasp_sim_omniverse.py`.  
+  This script registers a callback so that after a short delay the grippers move to the closed position and grasp the object.
+
+Options for `create_grasp_sim_usd.py`: **`--gripper_usd`** (default `assets/bots/robotiq_2f_85.usd`), **`--num_envs`** (default `10`), **`--env_spacing`** (default `0.6` m).
+
 ## FAQ
 
 ### How do I train for a new gripper?
