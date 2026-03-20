@@ -1307,6 +1307,8 @@ class ObjectPickDataset(PickDataset):
                     pc,
                     self.gripper_visual_mesh,
                 )
+        if type(outputs["points"]) == np.ndarray:
+            outputs["points"] = torch.from_numpy(outputs["points"]).float()
         if len(outputs["points"].shape) == 2:
             outputs["points"] = outputs["points"].unsqueeze(0)
         return outputs
@@ -1501,9 +1503,13 @@ def load_discriminator_batch_with_stratified_sampling(
     obj_asset_path = scene_info["assets"][0]
     obj_pose = scene_info["poses"][0]
 
-    scene_mesh = trimesh.load(obj_asset_path)
-    scene_mesh.apply_scale(obj_scale)
-    scene_mesh.apply_transform(obj_pose)
+    if os.path.exists(obj_asset_path):
+        scene_mesh = trimesh.load(obj_asset_path)
+        scene_mesh.apply_scale(obj_scale)
+        scene_mesh.apply_transform(obj_pose)
+    else:
+        scene_mesh = None
+        num_neg_hncolliding = 0  # mesh-based hard negatives unavailable
 
     grasps, grasp_ids = None, None
 

@@ -421,6 +421,59 @@ Make sure your docker container has sufficient CPU, swap and GPU memory. Please 
 
 You will need instance segmentation (e.g. [SAM2](https://ai.meta.com/sam2/)) and motion planning (e.g. [cuRobo](https://curobo.org/)) to run this model. More details can be found in the experiments section of the paper.
 
+### How do I fine-tune the discriminator on real-world robot data?
+
+GraspGen supports fine-tuning the discriminator on real grasp execution outcomes — no mesh required.
+
+**Step 1: Record rollouts on your robot**
+
+In your robot control loop, record each grasp attempt:
+
+```python
+from scripts.record_grasp import GraspRecorder
+
+recorder = GraspRecorder(
+    object_id="my_object.obj",   # unique name for this object
+    output_dir="/data/rollouts/my_object",
+)
+
+# After each grasp attempt:
+recorder.record(
+    point_cloud=pc,        # (N, 3) numpy array, object-centered, from depth camera
+    grasp_pose=T,          # (4, 4) SE(3) matrix — exactly as returned by GraspGenSampler
+    confidence=conf,       # discriminator score from GraspGenSampler.run_inference()
+    success=True/False,    # did the object end up in the gripper?
+    collided=False,        # did the gripper collide before closing?
+)
+
+recorder.save()   # writes rollouts.h5 + grasps.json
+```
+
+> **Important:** `point_cloud` and `grasp_pose` must be in the same coordinate frame — the object-centered frame that `GraspGenSampler` uses (it subtracts the point cloud mean before inference and adds it back to the returned poses). Pass the pose exactly as returned by `run_inference()`.
+
+> **Success labels:** Use fingertip position checking or a force sensor to determine `success`. A grasp that collided with the scene before closing should be marked `collided=True` — it will be excluded from training (it never got a fair attempt).
+
+**Step 2: Prepare the cache for training**
+
+Once you have collected enough rollouts (recommended: 50+ attempts, at least a few successes):
+
+```bash
+python scripts/prepare_finetune.py \
+    --rollouts   /data/rollouts/my_object \
+    --cache_dir  /data/cache \
+    --dataset_dir /data/dataset \
+    --object_id  my_object.obj \
+    --gripper    robotiq_2f_140
+```
+
+This prints the exact `train_graspgen.py` command to run. Execute it to fine-tune.
+
+**What to expect:**
+- Discriminator loss should decrease within the first epoch
+- With ~50 rollouts the improvement is modest but measurable
+- More rollouts from diverse viewpoints → better generalization
+- The generator is not fine-tuned, only the discriminator
+
 ### You did not include the gripper I have/want with your dataset!
 Sorry we missed your gripper! Please consider completing this quick [survey](https://docs.google.com/forms/d/e/1FAIpQLSdTCstEtaeZz5iSyjAhYFuJqSpMF671ftPylkS3ZJFhRIg3dg/viewform?usp=dialog) to describe your gripper. You can optionally leave a your URDF.
 
