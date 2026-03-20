@@ -60,7 +60,13 @@ def main():
 
     if n_noncolliding < 10:
         print(f"Only {n_noncolliding} non-colliding attempts — signal may be weak. "
-              f"Recommend collecting at least 50.")
+              f"Recommend collecting at least 10.")
+
+    # Validate that the ratio we're about to print is the right length.
+    # train_graspgen.py accesses onpolicy slots (indices 5, 6) unconditionally
+    # when load_discriminator_dataset=True; a 5-element ratio crashes there.
+    _ratio = [0.30, 0.10, 0.15, 0.05, 0.0, 0.20, 0.20]
+    assert len(_ratio) == 7, "discriminator_ratio must have 7 elements for onpolicy data"
 
     from scripts.record_grasp import GraspRecorder
     from grasp_gen.dataset.dataset import get_cache_prefix

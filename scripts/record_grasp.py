@@ -94,7 +94,7 @@ class GraspRecorder:
         with h5py.File(h5_path, "w") as f:
             grp = f.require_group(f"objects/{self.object_id}")
             grp.create_dataset("pred_grasps",  data=pred_grasps)
-            grp.create_dataset("gt_grasps",    data=pred_grasps)  # placeholder
+            grp.create_dataset("gt_grasps",    data=pred_grasps)  # no GT annotations in real-world rollouts; mirrors pred_grasps
             grp.create_dataset("confidence",   data=confidences)
             grp.create_dataset("collision",    data=collisions)
             grp.create_dataset("point_clouds", data=point_clouds)
@@ -186,9 +186,8 @@ class GraspRecorder:
     @classmethod
     def from_h5(cls, h5_path: str, object_id: str, output_dir: str) -> "GraspRecorder":
         """Reconstruct a GraspRecorder from a saved rollouts.h5 + grasps.json."""
-        import h5py as _h5py
         recorder = cls(object_id=object_id, output_dir=output_dir)
-        with _h5py.File(h5_path, "r") as f:
+        with h5py.File(h5_path, "r") as f:
             grp          = f["objects"][object_id]
             pred_grasps  = grp["pred_grasps"][...]
             confidences  = grp["confidence"][...]
@@ -196,10 +195,9 @@ class GraspRecorder:
             point_clouds = grp["point_clouds"][...]
             pc_sizes     = grp["pc_sizes"][...] if "pc_sizes" in grp else None
 
-        import json as _json
         json_path = os.path.join(output_dir, "grasps.json")
         with open(json_path) as jf:
-            data = _json.load(jf)
+            data = json.load(jf)
         success_labels = np.array(data["grasps"]["object_in_gripper"])
 
         non_colliding_idx = np.where(~collisions)[0]

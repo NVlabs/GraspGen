@@ -29,7 +29,7 @@ NUM_POINTS   = 512
 NUM_GRASPS   = 20
 GRIPPER_NAME = "robotiq_2f_140"
 GRIPPER_DEPTH = 0.195   # from config/grippers/robotiq_2f_140.yaml
-CKPT_PATH    = "/code/checkpoints/graspgen_robotiq_2f_140_dis.pth"
+CKPT_PATH    = "/code/checkpoints/graspgen_robotiq_2f_140_dis.pth"  # mount checkpoints at /code/checkpoints inside Docker
 
 
 def make_grasp(z_offset=0.0):

@@ -455,7 +455,7 @@ recorder.save()   # writes rollouts.h5 + grasps.json
 
 **Step 2: Prepare the cache for training**
 
-Once you have collected enough rollouts (recommended: 50+ attempts, at least a few successes):
+Once you have collected enough rollouts (recommended: 10+ non-colliding attempts, at least a few successes):
 
 ```bash
 python scripts/prepare_finetune.py \
@@ -470,9 +470,13 @@ This prints the exact `train_graspgen.py` command to run. Execute it to fine-tun
 
 **What to expect:**
 - Discriminator loss should decrease within the first epoch
-- With ~50 rollouts the improvement is modest but measurable
+- With ~10–50 rollouts the improvement is modest but measurable
 - More rollouts from diverse viewpoints → better generalization
 - The generator is not fine-tuned, only the discriminator
+
+**Implementation notes:**
+- `rollouts.h5` stores a `gt_grasps` field that mirrors `pred_grasps`. Real-world rollouts don't have ground-truth grasp annotations, so the predicted poses are used as a placeholder — this is intentional, not a bug.
+- The printed `train_graspgen.py` command uses a 7-element `discriminator_ratio`. Do not shorten it to 5 elements — `train_graspgen.py` always accesses the onpolicy slots (indices 5 and 6) when `load_discriminator_dataset=true`, and a 5-element ratio will crash inside the dataloader.
 
 ### You did not include the gripper I have/want with your dataset!
 Sorry we missed your gripper! Please consider completing this quick [survey](https://docs.google.com/forms/d/e/1FAIpQLSdTCstEtaeZz5iSyjAhYFuJqSpMF671ftPylkS3ZJFhRIg3dg/viewform?usp=dialog) to describe your gripper. You can optionally leave a your URDF.
