@@ -186,47 +186,10 @@ cd /code/ && python scripts/demo_object_pc.py --sample_data_dir /models/sample_d
 <img src="fig/pc/1.png" width="240" height="200" title="objpc1"> <img src="fig/pc/2.png" width="240" height="200" title="objpc2"> <img src="fig/pc/3.png" width="240" height="200" title="objpc3"> <img src="fig/pc/4.png" width="200" height="200" title="objpc4"> <img src="fig/pc/5.png" width="240" height="200" title="objpc5"> <img src="fig/pc/6.png" width="200" height="200" title="objpc6">
 
 ### Predicting grasps for object meshes
-Supports `.obj`, `.stl`, `.ply`, and USD formats (`.usd`, `.usda`, `.usdc`, `.usdz`). USD files are loaded via [scene_synthesizer](https://github.com/NVlabs/scene_synthesizer).
+Supports `.obj`, `.stl`, and `.ply` formats.
 ```bash
 cd /code/ && python scripts/demo_object_mesh.py --mesh_file /models/sample_data/meshes/box.obj --mesh_scale 1.0 --gripper_config /models/checkpoints/graspgen_robotiq_2f_140.yml
 ```
-USD example:
-```bash
-cd /code/ && python scripts/demo_object_mesh.py --mesh_file /path/to/object.usd --mesh_scale 1.0 --gripper_config /models/checkpoints/graspgen_robotiq_2f_140.yml
-```
-
-**Producing a USD with the object, grasps (poses), and grasps_visualization (wireframes):**  
-Run the following from the GraspGen repo root (with `.venv` activated). Replace `GRIPPER_CONFIG` and `GRASPS_OUTPUT_USD` as needed. The result will have three entries under `/world`: the object mesh, `/world/grasps` (pose Xforms only), and `/world/grasps_visualization` (gripper wireframe at each pose, same format as viser).
-
-```bash
-# 1) Convert mesh to USD (object only). Add --light-blue for a light blue mesh in the USD.
-python scripts/convert_obj_to_usd.py --input assets/objects/box.obj --output assets/objects/box.usd
-
-# 2) Run GraspGen inference and save grasps to YAML
-python scripts/demo_object_mesh.py --mesh_file assets/objects/box.usd --mesh_scale 1.0 \
-  --gripper_config GRIPPER_CONFIG --output_file /tmp/box_grasps.yml --no-visualization --num_grasps 50
-
-# 3) Write grasps and grasps_visualization into the USD
-python scripts/save_grasps_to_usd.py --usd_file assets/objects/box.usd --grasps_yaml /tmp/box_grasps.yml \
-  --gripper_name robotiq_2f_140 --output GRASPS_OUTPUT_USD
-```
-
-Example with Robotiq checkpoint (set `GRIPPER_CONFIG` to your GraspGenModels path, e.g. `../GraspGenModels/checkpoints/graspgen_robotiq_2f_140.yml`):
-
-```bash
-python scripts/convert_obj_to_usd.py --input assets/objects/box.obj --output assets/objects/box.usd
-python scripts/demo_object_mesh.py --mesh_file assets/objects/box.usd --mesh_scale 1.0 \
-  --gripper_config ../GraspGenModels/checkpoints/graspgen_robotiq_2f_140.yml \
-  --output_file /tmp/box_grasps.yml --no-visualization --num_grasps 50
-python scripts/save_grasps_to_usd.py --usd_file assets/objects/box.usd --grasps_yaml /tmp/box_grasps.yml \
-  --gripper_name robotiq_2f_140 --output assets/objects/box_with_grasps.usd
-```
-
-To get a **light blue** box in the USD, add `--light-blue` to the convert step:
-```bash
-python scripts/convert_obj_to_usd.py --input assets/objects/box.obj --output assets/objects/box.usd --light-blue
-```
-Or use a custom color (RGB 0–1): `--color 0.68 0.85 1.0`
 
 <img src="fig/meshes/1.png" width="240" height="200" title="objpc1"> <img src="fig/meshes/2.png" width="240" height="200" title="objpc2"> <img src="fig/meshes/3.png" width="240" height="200" title="objpc3">
 
