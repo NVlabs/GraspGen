@@ -36,6 +36,10 @@ def knn_points(X: torch.Tensor, K: int, norm: int):
         idxs: (N, K) tensor containing indices of the K nearest neighbors.
     """
     N, _ = X.shape
+    if N == 0:
+        raise ValueError("Point cloud is empty")
+
+    effective_k = min(K, max(1, N - 1))
 
     # Compute pairwise squared Euclidean distances
     dist_matrix = torch.cdist(X, X, p=norm)  # (N, N)
@@ -45,7 +49,7 @@ def knn_points(X: torch.Tensor, K: int, norm: int):
     dist_matrix.masked_fill_(self_mask, float("inf"))  # Set self-distances to inf
 
     # Get the indices of the K-nearest neighbors
-    dists, idxs = torch.topk(dist_matrix, K, dim=1, largest=False)
+    dists, idxs = torch.topk(dist_matrix, effective_k, dim=1, largest=False)
 
     return dists, idxs
 
@@ -74,11 +78,26 @@ def point_cloud_outlier_removal(
     obj_pc = obj_pc.float()
     obj_pc = obj_pc.unsqueeze(0)
 
+    num_points = obj_pc.shape[1]
+    if num_points <= max(1, K):
+        removed_pc = obj_pc[0].new_empty((0, 3))
+        logger.info(
+            f"Skipping outlier removal for small point cloud ({num_points} points)"
+        )
+        return obj_pc[0].view(-1, 3), removed_pc
+
     nn_dists, _ = knn_points(obj_pc[0], K=K, norm=1)
 
     mask = nn_dists.mean(1) < threshold
     filtered_pc = obj_pc[0, mask]
     removed_pc = obj_pc[0][~mask]
+
+    if filtered_pc.shape[0] == 0:
+        logger.info(
+            "Outlier removal removed all points; falling back to original point cloud"
+        )
+        return obj_pc[0].view(-1, 3), obj_pc[0].new_empty((0, 3))
+
     filtered_pc = filtered_pc.view(-1, 3)
     removed_pc = removed_pc.view(-1, 3)
 
@@ -119,11 +138,37 @@ def point_cloud_outlier_removal_with_color(
     obj_pc_color = obj_pc_color.float()
     obj_pc_color = obj_pc_color.unsqueeze(0)
 
+    num_points = obj_pc.shape[1]
+    if num_points <= max(1, K):
+        removed_pc = obj_pc[0].new_empty((0, 3))
+        removed_pc_color = obj_pc_color[0].new_empty((0, 3))
+        logger.info(
+            f"Skipping outlier removal for small point cloud ({num_points} points)"
+        )
+        return (
+            obj_pc[0].view(-1, 3),
+            removed_pc,
+            obj_pc_color[0].view(-1, 3),
+            removed_pc_color,
+        )
+
     nn_dists, _ = knn_points(obj_pc[0], K=K, norm=1)
 
     mask = nn_dists.mean(1) < threshold
     filtered_pc = obj_pc[0, mask]
     removed_pc = obj_pc[0][~mask]
+
+    if filtered_pc.shape[0] == 0:
+        logger.info(
+            "Outlier removal removed all points; falling back to original point cloud/colors"
+        )
+        return (
+            obj_pc[0].view(-1, 3),
+            obj_pc[0].new_empty((0, 3)),
+            obj_pc_color[0].view(-1, 3),
+            obj_pc_color[0].new_empty((0, 3)),
+        )
+
     filtered_pc = filtered_pc.view(-1, 3)
     removed_pc = removed_pc.view(-1, 3)
 

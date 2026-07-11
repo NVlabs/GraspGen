@@ -149,6 +149,9 @@ docker run \
   -e NVIDIA_DISABLE_REQUIRE=1 \
   -e NVIDIA_DRIVER_CAPABILITIES=all \
   --device /dev/dri \
+    --device /dev/bus/usb:/dev/bus/usb \
+    --device-cgroup-rule='c 189:* rmw' \
+    -v /run/udev:/run/udev:ro \
   -it \
   -e DISPLAY \
   $VOLUME_MOUNTS \
@@ -157,5 +160,5 @@ docker run \
   --shm-size 40G \
   graspgen:latest \
   /bin/bash \
-  -c "cd /code/ && pip install -e . && bash" \
+    -c "cd /code/ && pip install -e . && bash"
 xhost -local:root

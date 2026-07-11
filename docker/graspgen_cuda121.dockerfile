@@ -1,6 +1,8 @@
 # Build base image
 FROM nvcr.io/nvidia/pytorch:23.07-py3 AS base
 
+ARG PYORBBECSDK2_WHL=""
+
 # tmux is for debugging, osmesa is for rendering. Put all apt-get installs in this line
 RUN apt update && apt-get install -y tmux libosmesa6-dev
 
@@ -24,7 +26,7 @@ RUN pip install pyrender==0.1.45 pyglet==2.1.6 && pip install PyOpenGL==3.1.5
 
 # Install pointnet2 modules
 COPY pointnet2_ops pointnet2_ops
-RUN pip install ./pointnet2_ops
+RUN pip install --no-build-isolation ./pointnet2_ops
 
 # Diffusion dependencies
 RUN pip install diffusers==0.11.1 timm==1.0.15
@@ -56,5 +58,12 @@ RUN cd /install/Manifold/build
 RUN cd /install/Manifold/build && cmake .. -DCMAKE_BUILD_TYPE=Release
 RUN cd /install/Manifold/build && make
 ENV PATH="${PATH}:/install/Manifold/build/"
+
+RUN if [ -n "$PYORBBECSDK2_WHL" ]; then \
+			echo "Installing pyorbbecsdk2 from $PYORBBECSDK2_WHL" && \
+			pip install "$PYORBBECSDK2_WHL"; \
+		else \
+			echo "Skipping pyorbbecsdk2 install (PYORBBECSDK2_WHL not set)"; \
+		fi
 
 WORKDIR /code/
