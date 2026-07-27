@@ -1,6 +1,6 @@
 
 _target_: graspsampling.hands.URDFHand
-file_name: /home/clemens/code/graspsampling-py/data/hands/robotiq_2f_85/urdf/robotiq_arg2f_85_model.urdf
+file_name: data/hands/robotiq_2f_85/urdf/robotiq_arg2f_85_model.urdf
 grasp_frame: base_frame
 maximum_aperture: 0.12
 approach_direction: [0., 0., 1.]
