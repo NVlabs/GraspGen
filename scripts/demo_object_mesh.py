@@ -139,7 +139,7 @@ def parse_args():
 
 def load_mesh_data(mesh_file, scale, num_sample_points):
     """Load mesh data and sample points from surface."""
-    if mesh_file.endswith("ply"):
+    if mesh_file.endswith(".ply"):
         import open3d as o3d
 
         pcd = o3d.io.read_point_cloud(mesh_file)
@@ -205,8 +205,9 @@ if __name__ == "__main__":
     )
 
     # Visualize original mesh
-    if not args.no_visualization and obj_mesh is not None:
-        visualize_mesh(vis, "object_mesh", obj_mesh, color=[169, 169, 169])
+    if not args.no_visualization:
+        if obj_mesh is not None:
+            visualize_mesh(vis, "object_mesh", obj_mesh, color=[169, 169, 169])
         visualize_pointcloud(vis, "pc", pc, pc_color, size=0.0025)
 
     # Run inference on point cloud
