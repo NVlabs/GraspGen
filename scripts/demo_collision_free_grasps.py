@@ -63,7 +63,6 @@ def parse_args():
         "--camera_intrinsics",
         type=float,
         nargs=4,
-        required=True,
         default=[1480.589599609375, 1480.589599609375, 960.0, 540.0],
         help="Camera intrinsics as [fx, fy, cx, cy]",
     )
@@ -139,6 +138,12 @@ def parse_args():
         type=int,
         default=8192,
         help="Maximum number of scene points to use for collision checking (for speed optimization)",
+    )
+    parser.add_argument(
+        "--target_object_id",
+        type=int,
+        default=1,
+        help="Instance ID of the target object in the segmentation mask",
     )
     parser.add_argument(
         "--visualize",
@@ -242,7 +247,7 @@ if __name__ == "__main__":
                 cx=cx,
                 cy=cy,
                 rgb_image=rgb_image,
-                target_object_id=1,  # Assuming object has ID 1
+                target_object_id=args.target_object_id,
                 remove_object_from_scene=True,
             )
         )
@@ -403,6 +408,7 @@ if __name__ == "__main__":
         "scene_pc": scene_pc_centered,
         "object_pc": pc_centered,
         "camera_intrinsics": {"fx": fx, "fy": fy, "cx": cx, "cy": cy},
+        "T_center": T_center,
     }
 
     output_file = "collision_free_grasps_results.npz"
