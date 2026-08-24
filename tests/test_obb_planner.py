@@ -287,9 +287,10 @@ def test_topdown_cuboid_on_table_obb_geometry():
     assert T[2, 3] >= 0.02 - 2e-3, f"grasp z {T[2,3]} not above the 2cm top face"
 
 
-def test_topdown_cuboid_on_table_not_skipped():
+def test_topdown_cuboid_on_table_extents_fit_gripper():
     """The 4cm width is well under any supported gripper aperture, so the
-    OBB top-down branch must NOT be skipped for this object."""
+    object extents are a precondition for the OBB top-down branch not being
+    skipped."""
     pc = make_cuboid_on_table((0.10, 0.04, 0.02), n=3000)
     _, half_extent, _ = _compute_obb(pc, mode="advanced")
     full_extent = 2.0 * half_extent
