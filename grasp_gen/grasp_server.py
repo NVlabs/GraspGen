@@ -330,10 +330,17 @@ class GraspGenSampler:
             grasp_contacts: torch.tensor of shape (M, 3)
         """
 
+        if isinstance(obj_pcd, torch.Tensor):
+            obj_pcd = obj_pcd.detach().cpu().numpy()
+
         if remove_outliers:
             obj_pcd, _ = point_cloud_outlier_removal(obj_pcd)
 
-        obj_pcd_center = obj_pcd.mean(axis=0)
+        obj_pcd = torch.from_numpy(obj_pcd).float()
+        device = next(self.model.parameters()).device
+        obj_pcd = obj_pcd.to(device)
+
+        obj_pcd_center = obj_pcd.mean(dim=0)
         obj_pts_color = torch.zeros_like(obj_pcd)
         obj_mean_points = obj_pcd - obj_pcd_center[None]
 
@@ -359,7 +366,12 @@ class GraspGenSampler:
                 raise NotImplementedError(f"Invalid model {self.cfg.eval.model_name}!")
 
         if len(model_outputs[grasp_key][0]) == 0:
-            return [], [], []
+            device = next(self.model.parameters()).device
+            return (
+                torch.empty(0, 4, 4, device=device),
+                torch.empty(0, device=device),
+                torch.empty(0, 3, device=device),
+            )
 
         grasps = model_outputs[grasp_key][0]
 
