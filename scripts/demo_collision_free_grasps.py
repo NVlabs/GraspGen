@@ -276,7 +276,7 @@ if __name__ == "__main__":
     filter_time = time.time() - filter_start
     print(f"Point cloud filtering took: {filter_time:.2f} seconds")
     print(
-        f"Filtered object point cloud: {len(pc_filtered)} outlier points (removed {len(pc_removed)})"
+        f"Filtered object point cloud: {len(pc_filtered)} inlier points (removed {len(pc_removed)} outliers)"
     )
 
     # Initialize GraspGenSampler and run inference
